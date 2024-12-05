@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 113184982}
   - component: {fileID: 113184985}
   m_Layer: 0
-  m_Name: Mercurio
+  m_Name: Marte
   m_TagString: Planet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -217,7 +217,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: fc9b2697f1b598641adec998d1f2db18, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b0f07885ac8dbf749ad7bdcccdce4316, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -255,7 +255,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e548ae509cbf4954db9e5fbcc9af1c73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  detectionRadius: 4
+  detectionRadius: 3.5
   dialogController: {fileID: 1714353896}
   opc1: {fileID: 2051140425}
   opc2: {fileID: 1292202580}
