@@ -1,12 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro; // Adiciona suporte ao TextMeshPro
 
 [System.Serializable]
 public class Boundary
 {
     public float xMin, xMax, yMin, yMax;
-
 }
 
 public class PlayerController : MonoBehaviour
@@ -27,7 +27,11 @@ public class PlayerController : MonoBehaviour
     private float nextFire;
     public Boundary boundary;
 
-    // Start is called before the first frame update
+    // Variáveis para o contador de tempo
+    public TextMeshProUGUI timerText; // Referência ao componente de texto na tela
+    private float remainingTime = 60f; // Tempo inicial (60 segundos)
+
+    // Start é chamado antes do primeiro frame
     void Start()
     {
         rig = GetComponent<Rigidbody2D>();
@@ -35,24 +39,34 @@ public class PlayerController : MonoBehaviour
 
         startPosition = transform.position;
 
+        // Inicializa o texto do contador
+        if (timerText != null)
+        {
+            UpdateTimerText();
+        }
     }
 
-    // Update is called once per frame
+    // Update é chamado uma vez por frame
     void Update()
     {
         GameManager.instance.SetLivesText(lives);
-        rig.velocity = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")) * speed;
-        // limite do movimento do player
-        rig.position = new Vector2(Mathf.Clamp(rig.position.x, boundary.xMin,boundary.xMax),
-                                   Mathf.Clamp(rig.position.y, boundary.yMin, boundary.yMax));
+        UpdateTimer();
 
-        if(!isDead)
+        rig.velocity = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")) * speed;
+
+        // Limita o movimento do player
+      //  rig.position = new Vector2(
+      //      Mathf.Clamp(rig.position.x, boundary.xMin, boundary.xMax),
+      //      Mathf.Clamp(rig.position.y, boundary.yMin, boundary.yMax)
+      //  );
+
+        if (!isDead)
         {
-            if(Input.GetButtonDown("Fire1") && Time.time > nextFire)
+            if (Input.GetButtonDown("Fire1") && Time.time > nextFire)
             {
                 nextFire = Time.time + fireRate;
 
-                if(fireLevel >= 1)
+                if (fireLevel >= 1)
                 {
                     Instantiate(playerBullet, firePoints[0].position, firePoints[0].rotation);
                 }
@@ -60,22 +74,49 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void UpdateTimer()
+    {
+        if (remainingTime > 0)
+        {
+            remainingTime -= Time.deltaTime;
+            UpdateTimerText();
+
+            if (remainingTime <= 0)
+            {
+                remainingTime = 0;
+                // Adicione aqui a lógica quando o tempo chegar a zero
+                Debug.Log("O tempo acabou!");
+            }
+        }
+    }
+
+    private void UpdateTimerText()
+    {
+        int minutes = Mathf.FloorToInt(remainingTime / 60f);
+        int seconds = Mathf.FloorToInt(remainingTime % 60f);
+
+        // Atualiza o texto do tempo na UI
+        if (timerText != null)
+        {
+            timerText.text = $"{minutes:00}:{seconds:00}";
+        }
+    }
+
     public void Respawn()
     {
         lives--;
 
-        if(lives > 0)
+        if (lives > 0)
         {
-            // chamar o corotine
+            // Chama o Coroutine
             StartCoroutine(Spawning());
-        }else
+        }
+        else
         {
             lives = 0;
             isDead = true;
             sprite.enabled = false;
         }
-
-        //GameManager.instance.SetLivesText(lives);
     }
 
     IEnumerator Spawning()
@@ -87,12 +128,12 @@ public class PlayerController : MonoBehaviour
         isDead = false;
         transform.position = startPosition;
 
-        for(float i = 0; i < invincibilityTime; i+=0.1f)
+        for (float i = 0; i < invincibilityTime; i += 0.1f)
         {
             sprite.enabled = !sprite.enabled;
             yield return new WaitForSeconds(0.1f);
         }
         sprite.enabled = true;
-        fireLevel = 1;
-    }
+        fireLevel = 1;
+    }
 }
