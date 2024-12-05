@@ -34,7 +34,7 @@ public class PlanetInteraction : MonoBehaviour
         { "Marte", "Vênus", "Netuno" }      // Respostas para Netuno
     };
 
-    private int[] respostasCorretas = { 1, 2, 0, 1, 0, 0, 2, 1 };
+    private int[] respostasCorretas = { 1, 2, 0, 1, 0, 0, 0, 2 };
 
     public Button opc1;
     public Button opc2;

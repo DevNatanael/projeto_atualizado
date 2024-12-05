@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro; // Adiciona suporte ao TextMeshPro
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 public class Boundary
@@ -30,6 +31,9 @@ public class PlayerController : MonoBehaviour
     // Variáveis para o contador de tempo
     public TextMeshProUGUI timerText; // Referência ao componente de texto na tela
     private float remainingTime = 60f; // Tempo inicial (60 segundos)
+    public GameObject gameOverPanel; // Tela de Game Over
+    private bool isGameOver = false;
+
 
     // Start é chamado antes do primeiro frame
     void Start()
@@ -49,27 +53,30 @@ public class PlayerController : MonoBehaviour
     // Update é chamado uma vez por frame
     void Update()
     {
-        GameManager.instance.SetLivesText(lives);
-        UpdateTimer();
-
-        rig.velocity = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")) * speed;
-
-        // Limita o movimento do player
-      //  rig.position = new Vector2(
-      //      Mathf.Clamp(rig.position.x, boundary.xMin, boundary.xMax),
-      //      Mathf.Clamp(rig.position.y, boundary.yMin, boundary.yMax)
-      //  );
-
-        if (!isDead)
+        if (!isGameOver)
         {
-            if (Input.GetButtonDown("Fire1") && Time.time > nextFire)
-            {
-                nextFire = Time.time + fireRate;
+            GameManager.instance.SetLivesText(lives);
+            UpdateTimer();
 
-                if (fireLevel >= 1)
+            rig.velocity = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")) * speed;
+
+            if (!isDead)
+            {
+                if (Input.GetButtonDown("Fire1") && Time.time > nextFire)
                 {
-                    Instantiate(playerBullet, firePoints[0].position, firePoints[0].rotation);
+                    nextFire = Time.time + fireRate;
+
+                    if (fireLevel >= 1)
+                    {
+                        Instantiate(playerBullet, firePoints[0].position, firePoints[0].rotation);
+                    }
                 }
+            }
+
+            // Verifica se o jogador perdeu todas as vidas
+            if (lives == 0)
+            {
+                TriggerGameOver();
             }
         }
     }
@@ -86,6 +93,7 @@ public class PlayerController : MonoBehaviour
                 remainingTime = 0;
                 // Adicione aqui a lógica quando o tempo chegar a zero
                 Debug.Log("O tempo acabou!");
+                TriggerGameOver();
             }
         }
     }
@@ -102,21 +110,40 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void TriggerGameOver()
+    {
+        isGameOver = true;
+        Time.timeScale = 0; // Pausa o jogo
+
+        Debug.Log("caiu aqqq");
+        gameOverPanel.SetActive(true); // Exibe a tela de Game Over
+
+    }
+
     public void Respawn()
     {
-        lives--;
+        if (!isGameOver)
+        {
+            lives--;
 
-        if (lives > 0)
-        {
-            // Chama o Coroutine
-            StartCoroutine(Spawning());
+            if (lives > 0)
+            {
+                StartCoroutine(Spawning());
+            }
+            else
+            {
+                lives = 0;
+                isDead = true;
+                sprite.enabled = false;
+                TriggerGameOver();
+            }
         }
-        else
-        {
-            lives = 0;
-            isDead = true;
-            sprite.enabled = false;
-        }
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1; // Retoma o tempo
+        SceneManager.LoadScene("fase1"); // Reinicia a primeira fase
     }
 
     IEnumerator Spawning()
